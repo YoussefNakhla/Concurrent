@@ -10,7 +10,9 @@ static void linear_indices(const Dataset& d, const Params& beta,
     for (int j = 1; j < K; ++j) {
         double s = 0.0;
         const double* bj = &beta[(j - 1) * P];
-        for (int p = 0; p < P; ++p) s += xi[p] * bj[p];
+        for (int p = 0; p < P; ++p){
+            s += xi[p] * bj[p];
+        }
         out[j] = s;
     }
 }
@@ -19,10 +21,19 @@ static void linear_indices(const Dataset& d, const Params& beta,
 // to avoid overflow in the exponentials.
 static void choice_probs(const double* idx, double* prob) {
     double mx = idx[0];
-    for (int j = 1; j < K; ++j) if (idx[j] > mx) mx = idx[j];
+    for (int j = 1; j < K; ++j){
+        if (idx[j] > mx){
+            mx = idx[j];
+        }
+    }
     double denom = 0.0;
-    for (int j = 0; j < K; ++j) { prob[j] = std::exp(idx[j] - mx); denom += prob[j]; }
-    for (int j = 0; j < K; ++j) prob[j] /= denom;
+    for (int j = 0; j < K; ++j) { 
+        prob[j] = std::exp(idx[j] - mx); 
+        denom += prob[j]; 
+    }
+    for (int j = 0; j < K; ++j) {
+        prob[j] /= denom;
+    }
 }
 
 // Contribution of a single observation to the log-likelihood.
@@ -50,14 +61,24 @@ void grad_one(const Dataset& d, const Params& beta, std::size_t i,
     for (int r = 0; r < repeat; ++r) {
         linear_indices(d, beta, i, idx);
         choice_probs(idx, prob);
-        for (int j = 0; j < K; ++j) prob_acc[j] += prob[j];
+        for (int j = 0; j < K; ++j) {
+            prob_acc[j] += prob[j];
+        }
     }
-    for (int j = 0; j < K; ++j) prob[j] = prob_acc[j] / repeat;
+    for (int j = 0; j < K; ++j) {
+        prob[j] = prob_acc[j] / repeat;
+    }
 
     const double* xi = &d.X[i * P];
     int chosen = d.choice[i];
     for (int j = 1; j < K; ++j) {
-        double factor = (chosen == j ? 1.0 : 0.0) - prob[j];
-        for (int p = 0; p < P; ++p) grad[(j - 1) * P + p] += factor * xi[p];
+        if (chosen == j){
+            double factor = 1.0 - prob[j];
+        } else {
+            double factor = 0.0 - prob[j];
+        }
+        for (int p = 0; p < P; ++p) {
+            grad[(j - 1) * P + p] += factor * xi[p];
+        }   
     }
 }
