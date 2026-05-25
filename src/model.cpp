@@ -72,13 +72,14 @@ void grad_one(const Dataset& d, const Params& beta, std::size_t i,
     const double* xi = &d.X[i * P];
     int chosen = d.choice[i];
     for (int j = 1; j < K; ++j) {
+        double factor;
         if (chosen == j){
-            double factor = 1.0 - prob[j];
+            factor = 1.0 - prob[j];
         } else {
-            double factor = 0.0 - prob[j];
+            factor = -prob[j];
         }
         for (int p = 0; p < P; ++p) {
             grad[(j - 1) * P + p] += factor * xi[p];
-        }   
+        }
     }
 }
