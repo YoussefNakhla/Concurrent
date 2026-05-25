@@ -2,5 +2,6 @@ build/
 *.o
 *.out
 results/*.csv
+scripts/*
 results/*.png
 __pycache__/
