@@ -19,6 +19,7 @@ add_library(core
     src/data.cpp
     src/serial.cpp
     src/parallel.cpp
+    src/parallel_v2.cpp
 )
 target_include_directories(core PUBLIC src)
 target_link_libraries(core PUBLIC Threads::Threads)
