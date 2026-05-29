@@ -28,6 +28,9 @@ target_link_libraries(core PUBLIC Threads::Threads)
 add_executable(check_model tests/check_model.cpp)
 target_link_libraries(check_model PRIVATE core)
 
+add_executable(test_correctness tests/test_correctness.cpp)
+target_link_libraries(test_correctness PRIVATE core)
+
 # Main program (uncomment when src/main.cpp exists):
 add_executable(mle src/main.cpp)
 target_link_libraries(mle PRIVATE core)
