@@ -20,6 +20,7 @@ add_library(core
     src/serial.cpp
     src/parallel.cpp
     src/parallel_v2.cpp
+    src/optimizer.cpp
 )
 target_include_directories(core PUBLIC src)
 target_link_libraries(core PUBLIC Threads::Threads)
