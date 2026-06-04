@@ -35,3 +35,24 @@ target_link_libraries(test_correctness PRIVATE core)
 # Main program (uncomment when src/main.cpp exists):
 add_executable(mle src/main.cpp)
 target_link_libraries(mle PRIVATE core)
+
+# ---------------------------------------------------------------------------
+# Application: Poisson regression (doctor-visits count data)
+# Recompiles framework sources against applications/poisson/model.hpp, which
+# shadows src/model.hpp via the ordered include path.
+# ---------------------------------------------------------------------------
+add_library(poisson_core STATIC
+    src/serial.cpp
+    src/parallel.cpp
+    src/parallel_v2.cpp
+    src/optimizer.cpp
+    applications/poisson/model.cpp
+    applications/poisson/data.cpp
+)
+target_include_directories(poisson_core PUBLIC applications/poisson src)
+target_link_libraries(poisson_core PUBLIC Threads::Threads)
+
+add_executable(poisson_mle applications/poisson/main.cpp)
+target_link_libraries(poisson_mle PRIVATE poisson_core)
+
+
