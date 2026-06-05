@@ -67,22 +67,45 @@ def main():
     plt.legend(); plt.grid(True, alpha=0.3)
     plt.savefig("results/speedup_vs_threads.png", dpi=120, bbox_inches="tight")
 
-    # ---- Plot 3: v1 (mutex) vs v2 (partial sums) speedup, largest N ----
-    Nbig = sizes[-1]
-    plt.figure()
-    plt.plot([1, max_t], [1, max_t], "k--", alpha=0.5, label="ideal")
-    for col, lab in (("ms_v1", "v1 (mutex)"), ("ms_v2", "v2 (partial sums)")):
-        pts = sorted((r["threads"], serial_ms[Nbig] / r[col])
-                     for r in rows if r["N"] == Nbig)
-        xs = [t for t, _ in pts]; ys = [s for _, s in pts]
-        plt.plot(xs, ys, marker="o", label=lab)
-    plt.xlabel("threads"); plt.ylabel("speedup  (serial / parallel)")
-    plt.title(f"Lock contention: v1 vs v2  (N={Nbig})")
-    plt.legend(); plt.grid(True, alpha=0.3)
-    plt.savefig("results/v1_vs_v2_speedup.png", dpi=120, bbox_inches="tight")
+    # ---- Plot 3: v1 (mutex) vs v2 (partial sums) speedup, all N ----
+    fig, axes = plt.subplots(1, len(sizes), figsize=(4 * len(sizes), 4), sharey=True)
+    if len(sizes) == 1:
+        axes = [axes]
+    for ax, N in zip(axes, sizes):
+        ax.plot([1, max_t], [1, max_t], "k--", alpha=0.5, label="ideal")
+        for col, lab in (("ms_v1", "v1 (mutex)"), ("ms_v2", "v2 (partial sums)")):
+            pts = sorted((r["threads"], serial_ms[N] / r[col])
+                         for r in rows if r["N"] == N)
+            xs = [t for t, _ in pts]; ys = [s for _, s in pts]
+            ax.plot(xs, ys, marker="o", label=lab)
+        ax.set_title(f"N={N}")
+        ax.set_xlabel("threads")
+        ax.grid(True, alpha=0.3)
+        if ax is axes[0]:
+            ax.set_ylabel("speedup  (serial / parallel)")
+            ax.legend()
+    fig.suptitle("Lock contention: v1 (mutex) vs v2 (partial sums)")
+    fig.tight_layout()
+    fig.savefig("results/v1_vs_v2_speedup.png", dpi=120, bbox_inches="tight")
 
-    print("Wrote results/runtime_vs_threads.png, "
-          "results/speedup_vs_threads.png, results/v1_vs_v2_speedup.png")
+    # ---- Plot 4: parallel efficiency (speedup / T) for v2, all N ----
+    plt.figure()
+    plt.axhline(1.0, color="k", linestyle="--", alpha=0.5, label="ideal (100%)")
+    for N in sizes:
+        pts = sorted(
+            (r["threads"], (serial_ms[N] / r["ms_v2"]) / r["threads"])
+            for r in rows if r["N"] == N and r["threads"] > 0
+        )
+        xs = [t for t, _ in pts]; ys = [e for _, e in pts]
+        plt.plot(xs, ys, marker="o", label=f"N={N}")
+    plt.xlabel("threads"); plt.ylabel("efficiency  (speedup / threads)")
+    plt.title("Parallel efficiency (v2 partial sums)")
+    plt.ylim(0, 1.15)
+    plt.legend(); plt.grid(True, alpha=0.3)
+    plt.savefig("results/efficiency_vs_threads.png", dpi=120, bbox_inches="tight")
+
+    print("Wrote results/runtime_vs_threads.png, results/speedup_vs_threads.png, "
+          "results/v1_vs_v2_speedup.png, results/efficiency_vs_threads.png")
 
 if __name__ == "__main__":
     main()
