@@ -1,18 +1,10 @@
-# Concurrent — Parallel MLE (Multinomial Logit)
+# Concurrent — Parallel MLE
 
 Reformulation of Christopher Swann's MPI-based maximum likelihood estimation for a
-multinomial logit model as a shared-memory `std::thread` computation.
+multinomial logit model as a shared-memory `std::thread` computation. The same code
+is reused for a second model, a Poisson regression for count data.
 
-**Team:** Youssef Nakhla (serial track) · Nicolas Asseo (parallel track)
-
-## Layout
-
-```
-src/       Model, data, serial/parallel drivers, optimizer, main
-tests/     Correctness (serial vs parallel)
-bench/     Benchmark scripts and plotting
-results/   CSV and plot output (gitignored)
-```
+**Team:** Youssef Nakhla · Nicolas Asseo
 
 ## Build
 
@@ -21,11 +13,28 @@ cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
 
-(Full targets and sources are added incrementally as implementation proceeds.)
-
 ## Run
 
+Arguments are `N threads repeat`.
+
 ```bash
-./build/mle serial <N> <threads> <repeat>
-./build/mle parallel <N> <threads> <repeat>
+./build/mle solve 100000 4 50           # logit
+./build/poisson_mle solve 100000 4 50   # poisson
+```
+
+## Tests
+
+```bash
+./build/check_model        # model math and serial driver
+./build/check_optimizer    # optimizer convergence
+./build/test_correctness   # serial vs parallel agreement
+```
+
+## Benchmarks
+
+Runs the full sweep for both models and writes CSVs, plots and tables to
+`results/<machine>/`:
+
+```bash
+./bench/run_all.sh
 ```
